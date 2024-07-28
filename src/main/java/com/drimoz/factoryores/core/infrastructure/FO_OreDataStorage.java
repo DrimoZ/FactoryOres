@@ -1,7 +1,11 @@
 package com.drimoz.factoryores.core.infrastructure;
 
 import com.drimoz.factoryores.core.domain.FO_Dimension;
+import com.drimoz.factoryores.core.domain.FO_OrePatch;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.*;
+import net.minecraft.server.level.ColumnPos;
+import net.minecraft.world.level.Level;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,7 +26,7 @@ public class FO_OreDataStorage {
 
 
 
-    // Interface
+    // Interface ( Serialization )
 
     public CompoundTag save() {
         CompoundTag nbt = new CompoundTag();
@@ -44,6 +48,20 @@ public class FO_OreDataStorage {
             if (!(dimensionTag instanceof CompoundTag)) return;
             addDimension(FO_Dimension.load((CompoundTag) dimensionTag));
         }
+    }
+
+    // Interface
+
+    public FO_OrePatch getPlayerOrePatch(Level level, BlockPos pos) {
+        // Find correct FO_Dimension based on Level and FO_Dimension#id
+        FO_Dimension playerDim = dimensions.stream().filter(dimension ->
+            dimension.getDimensionId().toString().equals(level.dimension().location().toString())
+        ).findFirst().orElse(null);
+
+        if (playerDim == null) return null;
+
+        // Call Method to find OrePatch based on ColumnPos in FO_Dimension
+        return playerDim.findOrePatch(new ColumnPos(pos.getX(), pos.getZ()));
     }
 
     // Inner work

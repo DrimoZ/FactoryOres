@@ -110,6 +110,12 @@ public class FO_OrePatch {
 
     // Interface
 
+    public FO_Ore oresAtPosition(ColumnPos position) {
+        if (!containsPosition(position)) return null;
+
+        return this.positionMap.get(position);
+    }
+
     public boolean extractAtPosition(ColumnPos orePosition, int count, boolean simulate) {
         if (!containsPosition(orePosition)) return false;
 

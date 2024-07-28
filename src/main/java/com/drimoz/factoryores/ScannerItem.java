@@ -1,9 +1,12 @@
 package com.drimoz.factoryores;
 
 
+import com.drimoz.factoryores.core.domain.FO_Ore;
+import com.drimoz.factoryores.core.domain.FO_OrePatch;
+import com.drimoz.factoryores.core.infrastructure.FO_OreDataStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ColumnPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -23,20 +26,28 @@ public class ScannerItem extends Item {
         BlockPos pos = context.getClickedPos();
 
         if (!level.isClientSide && player != null) {
-            FakeOrePatchGenerator.FakeOreData data = ((ServerLevel) level).getDataStorage().computeIfAbsent(
-                    FakeOrePatchGenerator.FakeOreData::load,
-                    FakeOrePatchGenerator.FakeOreData::new,
-                    FakeOrePatchGenerator.FakeOreData.DATA_NAME
-            );
+            FO_OrePatch playerOrePatch = FO_OreDataStorage.getInstance().getPlayerOrePatch(level, pos);
 
-            if (data != null) {
-                FakeOrePatchGenerator.FakeOreData.OrePatch patch = data.getPatchAt(pos);
-                if (patch != null) {
-                    player.sendSystemMessage(Component.literal("Ore found! Initial amount: " + patch.getInitialCount() + ", Current amount: " + patch.getCurrentCount()));
-                } else {
-                    player.sendSystemMessage(Component.literal("No ore found at this location"));
-                }
+            if (playerOrePatch == null) {
+                player.sendSystemMessage(Component.literal("No ore found at this location"));
             }
+            else {
+                FO_Ore positionOre = playerOrePatch.oresAtPosition(new ColumnPos(pos.getX(), pos.getY()));
+                int positionOreCount = positionOre == null ? 0 : positionOre.currentCount();
+
+                player.sendSystemMessage(
+                        Component.literal(
+                                "§5 Ore Patch : §7" + playerOrePatch.getPatchOre().toString() + "\n" +
+                                        "§5 Base Count : §7" + playerOrePatch.getPatchBaseRichness() + "\n" +
+                                        "§5 Remaining Ores : §7" + playerOrePatch.getPatchCurrentRichness() + "\n" +
+                                        "============================" + "\n" +
+                                        "§5 Position Remaining Ores : §7" + positionOreCount
+
+                        )
+                );
+
+            }
+
             return InteractionResult.SUCCESS;
         }
 

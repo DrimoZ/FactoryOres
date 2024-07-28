@@ -5,6 +5,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ColumnPos;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.HashSet;
@@ -81,6 +82,10 @@ public class FO_Dimension {
     }
 
     // Interface
+
+    public FO_OrePatch findOrePatch(ColumnPos columnPos) {
+        return orePatches.stream().filter(orePatch -> orePatch.containsPosition(columnPos)).findFirst().orElse(null);
+    }
 
     public boolean addOrePatch(FO_OrePatch orePatch) {
         // TODO : Verify Patches !
